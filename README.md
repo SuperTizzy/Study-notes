@@ -23,3 +23,20 @@ def count():
     return fs
 f1, f2, f3 = count()
 print(f1(),f2(),f3())
+
+
+
+
+import functools
+def log():
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kw):
+            print('begin call %s():' % ( func.__name__))
+            return func(*args, **kw)         
+        return wrapper
+    return decorator
+@log()
+def now():
+    print('2015-3-25')
+print(now())

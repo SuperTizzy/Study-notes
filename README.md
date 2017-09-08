@@ -165,24 +165,70 @@ class Student(object):
 
 我们以斐波那契数列为例，写一个Fib类，可以作用于for循环
 
- class Fib(object):
-    def __init__(self):
-        self.a, self.b = 0, 1 # 初始化两个计数器a，b
+class Fib(object):
+def __init__(self):
+    self.a, self.b = 0, 1 # 初始化两个计数器a，b
 
-    def __iter__(self):
-        return self # 实例本身就是迭代对象，故返回自己
+def __iter__(self):
+    return self # 实例本身就是迭代对象，故返回自己
 
-    def __next__(self):
-        self.a, self.b = self.b, self.a + self.b # 计算下一个值
-        if self.a > 100000: # 退出循环的条件
-            raise StopIteration()
-        return self.a # 返回下一个值
-        
-   #要表现得像list那样按照下标取出元素，需要实现__getitem__()方法：
-   class Fib(object):
-    def __getitem__(self, n):
-        a, b = 1, 1
-        for x in range(n):
-            a, b = b, a + b
-        return a
-    
+def __next__(self):
+    self.a, self.b = self.b, self.a + self.b # 计算下一个值
+    if self.a > 100000: # 退出循环的条件
+        raise StopIteration()
+    return self.a # 返回下一个值
+
+#要表现得像list那样按照下标取出元素，需要实现__getitem__()方法：
+class Fib(object):
+def __getitem__(self, n):
+    a, b = 1, 1
+    for x in range(n):
+        a, b = b, a + b
+    return a
+    
+    
+    
+    
+    
+    
+#文件读写
+# 由于文件读写时都有可能产生IOError，一旦出错，后面的f.close()就不会调用。所以，为了保证无论是否出错都能正确地关闭文件，我们可以使用try ... finally来实现：
+try:
+    f=open('D:/Downloads/hello.py','r')
+    print(f.read())
+finally:
+    if f:
+        f.close()
+# 但是每次都这么写实在太繁琐，所以，Python引入了with语句来自动帮我们调用close()方法：
+with open('D:/Downloads/hello.py','r') as f:
+     print(f.read())
+# 。要读取二进制文件，比如图片、视频等等，用'rb'模式打开文件即可
+with open('D:/Pictures/IMG_20170829_083956.jpg''','rb') as f:
+     print(f.read())
+     
+#数据读写不一定是文件，也可以在内存中读写 
+  from io import StringIO
+f=StringIO()
+f.write('hello')
+f.write('  ')
+f.write('world')
+print(f.getvalue())
+
+f1=StringIO('hello!\nhi!\ngoodbye!')
+while True:
+    s=f1.readline()
+    if s=='':
+        break
+    print(s.strip())
+
+ 
+#通过os.path.split()函数，这样可以把一个路径拆分为两部分，后一部分总是最后级别的目录或文件名：
+ os.path.split('/Users/michael/testdir/file.txt')
+('/Users/michael/testdir', 'file.txt')
+# os.path.splitext()可以直接让你得到文件扩展名，很多时候非常方便：
+os.path.splitext('/path/to/file.txt')
+('/path/to/file', '.txt')  #这些合并、拆分路径的函数并不要求目录和文件要真实存在，它们只对字符串进行操作。
+
+
+
+ 

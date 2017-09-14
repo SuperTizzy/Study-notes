@@ -255,6 +255,87 @@ b'\x80\x03}q\x00(X\x03\x00\x00\x00ageq\x01K\x14X\x05\x00\x00\x00scoreq\x02KXX\x0
 
  
 # 多线程
+#当我们在命令行运行hello模块文件时，Python解释器把一个特殊变量__name__置为__main__，而如果在其他地方导入该hello模块时，if判断将失败，因此，这种if测试可以让一个模块通过命令行运行时执行一些额外的代码，最常见的就是运行测试。
+#multiprocessing适合跨平台编写多进程程序
 
+
+from multiprocessing import Process
+import os
+
+# 子进程要执行的代码
+def run_proc(name):
+    print('Run child process %s (%s)...' % (name, os.getpid()))
+
+if __name__=='__main__':
+    print('Parent process %s.' % os.getpid())
+    p = Process(target=run_proc, args=('test',))   #multiprocessing模块提供了一个Process类来代表一个进程对象
+    print('Child process will start.')
+    p.start()
+    p.join()  #创建子进程时，只需要传入一个执行函数和函数的参数，创建一个Process实例，用start()方法启动，这样创建进程比fork()还要简单。
+               join()方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。
+    print('Child process end.')
+    
+    
+    
+    
+ #启动大量的子进程，可以用进程池的方式批量创建子进程
+ from multiprocessing import Pool
+import os, time, random
+
+def long_time_task(name):
+    print('Run task %s (%s)...' % (name, os.getpid()))
+    start = time.time()
+    time.sleep(random.random() * 3)
+    end = time.time()
+    print('Task %s runs %0.2f seconds.' % (name, (end - start)))
+
+if __name__=='__main__':
+    print('Parent process %s.' % os.getpid())
+    p = Pool(4)
+    for i in range(5):
+        p.apply_async(long_time_task, args=(i,))
+    print('Waiting for all subprocesses done...')
+    p.close()  #对Pool对象调用join()方法会等待所有子进程执行完毕，调用join()之前必须先调用close()，调用close()之后就不能继续添加新的Process了。
+    p.join()
+    print('All subprocesses done.')
+    
+    
+ 
+# 进程间通信Process之间肯定是需要通信的，操作系统提供了很多机制来实现进程间的通信。Python的multiprocessing模块包装了底层的机制，提供了Queue、Pipes等多种方式来交换数据。我们以Queue为例，在父进程中创建两个子进程，一个往Queue里写数据，一个从Queue里读数据
+
+
+from multiprocessing import Process, Queue
+import os, time, random
+
+# 写数据进程执行的代码:
+def write(q):
+    print('Process to write: %s' % os.getpid())
+    for value in ['A', 'B', 'C']:
+        print('Put %s to queue...' % value)
+        q.put(value)
+        time.sleep(random.random())
+
+# 读数据进程执行的代码:
+def read(q):
+    print('Process to read: %s' % os.getpid())
+    while True:
+        value = q.get(True)
+        print('Get %s from queue.' % value)
+
+if __name__=='__main__':
+    # 父进程创建Queue，并传给各个子进程：
+    q = Queue()
+    pw = Process(target=write, args=(q,))
+    pr = Process(target=read, args=(q,))
+    # 启动子进程pw，写入:
+    pw.start()
+    # 启动子进程pr，读取:
+    pr.start()
+    # 等待pw结束:
+    pw.join()
+    # pr进程里是死循环，无法等待其结束，只能强行终止:
+    pr.terminate()
+ 
+ 
  
  

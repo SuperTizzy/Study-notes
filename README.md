@@ -422,5 +422,8 @@ re_email=re.compile(r'([<\w\s>]+)\s(\w+)@(\w+)\.[com,cn,org]')
 print(re_email.match('<Tom Paris> tom@voyager.org').groups())
 
 
+
+#python 模块
+
  
  

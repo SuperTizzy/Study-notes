@@ -610,12 +610,26 @@ with open('sina.html', 'wb') as f:
     f.write(html)
  
  #一个简单的服务器程序，它接收客户端连接，把客户端发过来的字符串加上Hello再发回去
-# 导入socket库:
 import socket
 import threading
 import time
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 创建一个socket:
-s.bind(('127.0.0.1', 9999))  # 监听端口
+# 每个连接都必须创建新线程（或进程）来处理，否则，单线程在处理连接的过程中，无法接受其他客户端的连接
+def tcplink(sock, addr):
+    print('Accept new connection from %s:%s...' % addr)
+    sock.send(b'Welcome!')
+    while True:
+        data = sock.recv(1024)
+        time.sleep(1)
+        if not data or data.decode('utf-8') == 'exit':
+            break
+        sock.send(('Hello, %s!' % data.decode('utf-8')).encode('utf-8'))
+    sock.close()
+    print('Connection from %s:%s closed.' % addr)
+    
+ 
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 创建一个基于IPv4和TCP协议的Socket
+s.bind(('127.0.0.1', 9999))  # 监听端口,127.0.0.1是一个特殊的IP地址，表示本机地址，如果绑定到这个地址，客户端必须同时在本机运行才能连接，也就是                                 说，外部的计算机无法连接进来,因为我们写的这个服务不是标准服务，所以用9999这个端口号。请注意，小于1024的端口号必须要                               有管理员权限才能绑定
+
 s.listen(5)# 紧接着，调用listen()方法开始监听端口，传入的参数指定等待连接的最大数量
 print('Waiting for connection...')
 while True:
@@ -624,24 +638,11 @@ while True:
     # 创建新线程来处理TCP连接:
     t = threading.Thread(target=tcplink, args=(sock, addr))
     t.start()
-# 每个连接都必须创建新线程（或进程）来处理，否则，单线程在处理连接的过程中，无法接受其他客户端的连接
-    def tcplink(sock, addr):
-        print('Accept new connection from %s:%s...' % addr)
-        sock.send(b'Welcome!')
-        while True:
-            data = sock.recv(1024)
-            time.sleep(1)
-            if not data or data.decode('utf-8') == 'exit':
-                break
-            sock.send(('Hello, %s!' % data.decode('utf-8')).encode('utf-8'))
-        sock.close()
-        print('Connection from %s:%s closed.' % addr)
 
-
-# 要测试这个服务器程序，我们还需要编写一个客户端程序
+#要测试这个服务器程序，我们还需要编写一个客户端程序
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # 建立连接:
-s.connect(('127.0.0.1', 9999))
+s.connect(('127.0.0.1', 9999))   
 # 接收欢迎消息:
 print(s.recv(1024).decode('utf-8'))
 for data in [b'Michael', b'Tracy', b'Sarah']:

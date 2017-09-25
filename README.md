@@ -578,9 +578,16 @@ class LastUpdatedOrderedDict(OrderedDict):
         OrderedDict.__setitem__(self, key, value)
  
 
+#TCP编程
+# 创建一个基于TCP连接的socket
+# 导入socket库:
+import socket
 
-
-
+# 创建一个socket:
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  #创建Socket时，AF_INET指定使用IPv4协议,SOCK_STREAM指定使用面向流的TCP协议
+# 建立连接:
+s.connect(('www.sina.com.cn', 80))  #新浪网站的IP地址可以用域名www.sina.com.cn自动转换到IP地址,80端口是Web服务的标准端口
+ 
 
 
 

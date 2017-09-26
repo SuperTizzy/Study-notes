@@ -675,3 +675,22 @@ for data in [b'Michael', b'Tracy', b'Sarah']:
 s.close()
 # 小结
 UDP的使用与TCP类似，但是不需要建立连接。此外，服务器绑定UDP端口和TCP端口互不冲突，也就是说，UDP的9999端口与TCP的9999端口可以各自绑定。
+ 
+ 
+# SMTP发送邮件
+from email.mime.text import MIMEText
+msg = MIMEText('hello, send by Python...', 'plain', 'utf-8')   #第一个参数是邮件正文，第二个参数是MIME的subtype，传入'plain'表示纯文本，最终的 # # 输入Email地址和口令:
+from_addr = input('From: ')
+password = input('Password: ')
+# 输入收件人地址:
+to_addr = input('To: ')
+# 输入SMTP服务器地址:
+smtp_server = input('SMTP server: ')
+
+import smtplib
+server = smtplib.SMTP(smtp_server, 25) # SMTP协议默认端口是25
+server.set_debuglevel(1)
+server.login(from_addr, password)
+server.sendmail(from_addr, [to_addr], msg.as_string())
+server.quit()                                                             MIME就是'text/plain'，最后一定要用utf-8编码保证多语言兼容性
+ 
